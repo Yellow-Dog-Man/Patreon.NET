@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using JsonApiSerializer;
 using JsonApiSerializer.JsonApi;
-using Newtonsoft.Json.Serialization;
 using System.Reflection;
 
 namespace Patreon.NET
@@ -21,8 +20,7 @@ namespace Patreon.NET
         public static string PledgesURL(string campaignId) => CampaignURL(campaignId) + "/pledges";
         public static string MembersURL(string campaignId) => CampaignURL(campaignId) + "/members";
         public static string MemberURL(string memberId) => SAFE_ROOT + $"members/{memberId}";
-
-        public static string UserURL(string userId) => PUBLIC_ROOT + "user/" + userId;
+        public static string UserURL(string userId) => PUBLIC_ROOT + $"user/{userId}";
 
         HttpClient httpClient;
 
@@ -105,18 +103,18 @@ namespace Patreon.NET
             return url;
         }
 
-        public async Task<HttpResponseMessage> GET(string url) => await httpClient.GetAsync(url);
+        public async Task<HttpResponseMessage> GET(string url) => await httpClient.GetAsync(url).ConfigureAwait(false);
 
         public async Task<T> GET<T>(string url)
             where T : class
         {
-            var response = await GET(url);
+            var response = await GET(url).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {
                 try
                 {
-                    var json = await response.Content.ReadAsStringAsync();
+                    var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var settings = new JsonApiSerializerSettings();
                     return JsonConvert.DeserializeObject<T>(json, settings);
                 }
@@ -150,10 +148,8 @@ namespace Patreon.NET
             return campaign.Relationships.Tiers;
         }
 
-        public async Task<List<Member>> GetCampaignMembers(string campaignId)
+        public async IAsyncEnumerable<Member> GetCampaignMembers(string campaignId)
         {
-            var list = new List<Member>();
-
             string next = MembersURL(campaignId);
 
             do
@@ -165,7 +161,8 @@ namespace Patreon.NET
 
                 var document = await GET<DocumentRoot<Member[]>>(url).ConfigureAwait(false);
 
-                list.AddRange(document.Data);
+                foreach (var d in document.Data)
+                    yield return d;
 
                 if (document.Links != null && document.Links.ContainsKey("next"))
                     next = document.Links["next"].Href;
@@ -173,8 +170,6 @@ namespace Patreon.NET
                     next = null;
 
             } while (next != null);
-
-            return list;
         }
 
         public async Task<User> GetUser(string id) => (await GET<UserData>(UserURL(id)).ConfigureAwait(false))?.User;
