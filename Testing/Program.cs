@@ -1,5 +1,5 @@
-﻿const string CAMPAIGN_ID = "10789880";
-const string ACCESS_TOKEN = "4P3KVEo1MaAIL_VJDaLBmQ_Jy0UL_yFe6XT-gJu_bhM";
+﻿const string CAMPAIGN_ID = "CAMPAIGN_ID";
+const string ACCESS_TOKEN = "ACCESS_TOKEN";
 
 var patreon = new Patreon.NET.PatreonClient(CAMPAIGN_ID, ACCESS_TOKEN);
 
