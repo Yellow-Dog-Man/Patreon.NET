@@ -23,9 +23,12 @@ namespace Patreon.NET
         public static string UserURL(string userId) => PUBLIC_ROOT + $"user/{userId}";
 
         HttpClient httpClient;
+        string campaignId;
 
-        public PatreonClient(string accessToken)
+        public PatreonClient(string campaignId, string accessToken)
         {
+            this.campaignId = campaignId;
+
             httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
         }
@@ -129,7 +132,7 @@ namespace Patreon.NET
             return null;
         }
 
-        public async Task<Campaign> GetCampaign(string campaignId)
+        public async Task<Campaign> GetCampaign()
         {
             var url = CampaignURL(campaignId);
 
@@ -141,14 +144,14 @@ namespace Patreon.NET
             return document.Data;
         }
 
-        public async Task<List<Tier>> GetCampaignTiers(string campaignId)
+        public async Task<List<Tier>> GetCampaignTiers()
         {
-            var campaign = await GetCampaign(campaignId).ConfigureAwait(false);
+            var campaign = await GetCampaign().ConfigureAwait(false);
 
             return campaign.Relationships.Tiers;
         }
 
-        public async IAsyncEnumerable<Member> GetCampaignMembers(string campaignId)
+        public async IAsyncEnumerable<Member> GetCampaignMembers()
         {
             string next = MembersURL(campaignId);
 
