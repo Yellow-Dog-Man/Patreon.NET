@@ -25,6 +25,11 @@ namespace Patreon.NET
         HttpClient httpClient;
         string campaignId;
 
+        public Campaign Campaign => _campaign;
+
+        Campaign _campaign;
+        Dictionary<string, TierAttributes> _tiers;
+
         public PatreonClient(string campaignId, string accessToken)
         {
             this.campaignId = campaignId;
@@ -132,23 +137,30 @@ namespace Patreon.NET
             return null;
         }
 
-        public async Task<Campaign> GetCampaign()
+        public async Task<bool> UpdateCampaignInfo()
         {
             var url = CampaignURL(campaignId);
 
-            url = AppendQuery(url, GenerateFieldsAndIncludes(typeof(CampaignRelationships), 
-                typeof(CampaignAttributes), typeof(UserAttributes), typeof(TierAttributes)));
+            url = AppendQuery(url, GenerateFieldsAndIncludes(
+                typeof(CampaignRelationships), 
+                typeof(CampaignAttributes),
+                typeof(UserAttributes),
+                typeof(TierAttributes)));
 
             var document = await GET<DocumentRoot<Campaign>>(url).ConfigureAwait(false);
 
-            return document.Data;
-        }
+            if (document.Data == null)
+                return false;
 
-        public async Task<List<Tier>> GetCampaignTiers()
-        {
-            var campaign = await GetCampaign().ConfigureAwait(false);
+            _campaign = document.Data;
 
-            return campaign.Relationships.Tiers;
+            _tiers = new Dictionary<string, TierAttributes>();
+
+            foreach (var tier in _campaign.Relationships.Tiers)
+                if(tier.Id != null)
+                    _tiers.Add(tier.Id, tier.Attributes);
+
+            return true;
         }
 
         public async IAsyncEnumerable<Member> GetCampaignMembers()
@@ -159,8 +171,10 @@ namespace Patreon.NET
             {
                 var url = next;
 
-                url = AppendQuery(url, GenerateFieldsAndIncludes(typeof(MemberRelationships),
-                    typeof(MemberAttributes), typeof(UserAttributes)));
+                url = AppendQuery(url, GenerateFieldsAndIncludes(
+                    typeof(MemberRelationships),
+                    typeof(MemberAttributes), 
+                    typeof(UserAttributes)));
 
                 var document = await GET<DocumentRoot<Member[]>>(url).ConfigureAwait(false);
 
@@ -176,6 +190,17 @@ namespace Patreon.NET
         }
 
         public async Task<User> GetUser(string id) => (await GET<UserData>(UserURL(id)).ConfigureAwait(false))?.User;
+
+        public TierAttributes TryGetTierById(string id)
+        {
+            if (_tiers == null)
+                return null;
+
+            if (_tiers.TryGetValue(id, out var tier))
+                return tier;
+
+            return null;
+        }
 
         public void Dispose()
         {
