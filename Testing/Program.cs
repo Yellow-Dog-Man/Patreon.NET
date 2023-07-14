@@ -6,6 +6,6 @@ var patreon = new Patreon.NET.PatreonClient(CAMPAIGN_ID, ACCESS_TOKEN);
 var info = await patreon.GetCampaign().ConfigureAwait(false);
 
 await foreach(var member in patreon.GetCampaignMembers().ConfigureAwait(false))
-    Console.WriteLine(member);
+    Console.WriteLine(member.Attributes.FullName);
 
 Console.Read();
