@@ -15,15 +15,6 @@ namespace Patreon.NET
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
 
-        [JsonProperty(PropertyName = "attributes")]
-        public PledgeEventAttributes Attributes { get; set; }
-
-        [JsonProperty(PropertyName = "relationships")]
-        public PledgeEventRelationships Relationships { get; set; }
-    }
-
-    public class PledgeEventAttributes
-    {
         [JsonProperty(PropertyName = "amount_cents")]
         public int AmountCents { get; set; }
 
@@ -41,13 +32,5 @@ namespace Patreon.NET
 
         [JsonProperty(PropertyName = "tier_title")]
         public string TierTitle { get; set; }
-
-        [JsonProperty(PropertyName = "type")]
-        public string Type { get; set; }
-    }
-
-    public class PledgeEventRelationships
-    {
-
     }
 }

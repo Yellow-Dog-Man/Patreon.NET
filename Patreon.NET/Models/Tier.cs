@@ -15,12 +15,6 @@ namespace Patreon.NET
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
 
-        [JsonProperty(PropertyName = "attributes")]
-        public TierAttributes Attributes { get; set; }
-    }
-
-    public class TierAttributes
-    {
         [JsonProperty(PropertyName = "amount_cents")]
         public int AmountCents { get; set; }
 
@@ -58,7 +52,7 @@ namespace Patreon.NET
         public string Title { get; set; }
 
         [JsonProperty(PropertyName = "unpublished_at")]
-        public DateTime UnpublishedAt { get; set; }
+        public DateTime? UnpublishedAt { get; set; }
 
         [JsonProperty(PropertyName = "url")]
         public string URL { get; set; }

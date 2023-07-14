@@ -15,21 +15,6 @@ namespace Patreon.NET
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
 
-        [JsonProperty(PropertyName = "attributes")]
-        public UserAttributes Attributes { get; set; }
-    }
-
-    public class UserData
-    {
-        [JsonProperty(PropertyName = "data")]
-        public User User { get; set; }
-
-        [JsonProperty(PropertyName = "links")]
-        public Links Links { get; set; }
-    }
-
-    public class UserAttributes
-    {
         [JsonProperty(PropertyName = "about")]
         public string About { get; set; }
 
@@ -71,5 +56,14 @@ namespace Patreon.NET
 
         [JsonProperty(PropertyName = "vanity")]
         public string Vanity { get; set; }
+    }
+
+    public class UserData
+    {
+        [JsonProperty(PropertyName = "data")]
+        public User User { get; set; }
+
+        [JsonProperty(PropertyName = "links")]
+        public Links Links { get; set; }
     }
 }

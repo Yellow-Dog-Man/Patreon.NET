@@ -28,7 +28,7 @@ namespace Patreon.NET
         public Campaign Campaign => _campaign;
 
         Campaign _campaign;
-        Dictionary<string, TierAttributes> _tiers;
+        Dictionary<string, Tier> _tiers;
 
         public PatreonClient(string campaignId, string accessToken)
         {
@@ -38,19 +38,110 @@ namespace Patreon.NET
             httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
         }
 
-        static string GenerateFieldsAndIncludes(Type includes, params Type[] fields)
+        static string GenerateFieldsAndIncludes(Type rootType, HashSet<Type> ignoreFields = null)
         {
             var str = new StringBuilder();
+            var generatedTypes = new HashSet<Type>();
+            var includes = new HashSet<string>();
 
-            foreach (var field in fields)
-            {
-                GenerateFields(field, str);
-                str.Append("&");
-            }
+            GenerateFieldsAndIncludes(rootType, str, generatedTypes, includes, ignoreFields);
 
-            GenerateIncludes(includes, str);
+            if (includes.Count > 0)
+                str.Append("&include=" + string.Join(",", includes));
 
             return str.ToString();
+        }
+
+        static void GenerateFieldsAndIncludes(Type rootType, StringBuilder str, HashSet<Type> generatedTypes, HashSet<string> includes,
+            HashSet<Type> ignoreFields)
+        {
+            if (!generatedTypes.Add(rootType))
+                return;
+
+            bool generateFields = ignoreFields == null || !ignoreFields.Contains(rootType);
+
+            if (generateFields)
+            {
+                str.Append("fields%5B");
+
+                var name = rootType.Name.Replace("Attributes", "");
+
+                for (int i = 0; i < name.Length; i++)
+                {
+                    var ch = name[i];
+
+                    if (char.IsUpper(ch) && i != 0)
+                        str.Append("_");
+
+                    str.Append(char.ToLower(ch));
+                }
+
+                str.Append("%5D=");
+            }
+
+            var relationships = new List<PropertyInfo>();
+
+            foreach (var property in rootType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                var attribute = property.GetCustomAttribute<JsonPropertyAttribute>(true);
+
+                if (attribute == null)
+                    continue;
+
+                var fieldName = attribute.PropertyName;
+
+                if (fieldName == null ||
+                    fieldName == "type" ||
+                    fieldName == "id")
+                    continue;
+
+                if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Relationship<>))
+                {
+                    var type = ExtractRelationshipType(property.PropertyType);
+
+                    if (generatedTypes.Contains(type))
+                        continue;
+
+                    // add it to the list of includes and handle generating fields afterwards
+                    if(includes.Add(fieldName))
+                        relationships.Add(property);
+
+                    continue;
+                }
+
+                if (generateFields)
+                {
+                    str.Append(fieldName);
+                    str.Append(",");
+                }
+            }
+
+            // remove the last comma
+            if(generateFields)
+                str.Length -= 1;
+
+            // handle the relationships now
+            foreach (var relationship in relationships)
+            {
+                var relationshipType = ExtractRelationshipType(relationship.PropertyType);
+
+                if(ignoreFields == null || !ignoreFields.Contains(relationshipType))
+                    str.Append("&");
+
+                GenerateFieldsAndIncludes(relationshipType, str, generatedTypes, includes, ignoreFields);
+            }
+        }
+
+        static Type ExtractRelationshipType(Type type)
+        {
+            var embeddedType = type.GetGenericArguments()[0];
+
+            if (embeddedType.IsGenericType &&
+                (embeddedType.GetGenericTypeDefinition() == typeof(List<>) ||
+                embeddedType.GetGenericTypeDefinition() == typeof(HashSet<>)))
+                return embeddedType.GetGenericArguments()[0];
+
+            return embeddedType;
         }
 
         static void GenerateFields(Type type, StringBuilder str)
@@ -70,13 +161,6 @@ namespace Patreon.NET
             }
 
             str.Append("%5D=");
-
-            GenerateFieldList(type, str);
-        }
-
-        static void GenerateIncludes(Type type, StringBuilder str)
-        {
-            str.Append($"include=");
 
             GenerateFieldList(type, str);
         }
@@ -141,24 +225,20 @@ namespace Patreon.NET
         {
             var url = CampaignURL(campaignId);
 
-            url = AppendQuery(url, GenerateFieldsAndIncludes(
-                typeof(CampaignRelationships), 
-                typeof(CampaignAttributes),
-                typeof(UserAttributes),
-                typeof(TierAttributes)));
+            url = AppendQuery(url, GenerateFieldsAndIncludes(typeof(Campaign)));
 
             var document = await GET<DocumentRoot<Campaign>>(url).ConfigureAwait(false);
 
-            if (document.Data == null)
+            if (document?.Data == null)
                 return false;
 
             _campaign = document.Data;
 
-            _tiers = new Dictionary<string, TierAttributes>();
+            _tiers = new Dictionary<string, Tier>();
 
-            foreach (var tier in _campaign.Relationships.Tiers)
+            foreach (var tier in _campaign.Tiers.Data)
                 if(tier.Id != null)
-                    _tiers.Add(tier.Id, tier.Attributes);
+                    _tiers.Add(tier.Id, tier);
 
             return true;
         }
@@ -171,10 +251,8 @@ namespace Patreon.NET
             {
                 var url = next;
 
-                url = AppendQuery(url, GenerateFieldsAndIncludes(
-                    typeof(MemberRelationships),
-                    typeof(MemberAttributes), 
-                    typeof(UserAttributes)));
+                url = AppendQuery(url, GenerateFieldsAndIncludes(typeof(Member), 
+                    new HashSet<Type>() { typeof(PledgeEvent), typeof(Tier) }));
 
                 var document = await GET<DocumentRoot<Member[]>>(url).ConfigureAwait(false);
 
@@ -191,7 +269,7 @@ namespace Patreon.NET
 
         public async Task<User> GetUser(string id) => (await GET<UserData>(UserURL(id)).ConfigureAwait(false))?.User;
 
-        public TierAttributes TryGetTierById(string id)
+        public Tier TryGetTierById(string id)
         {
             if (_tiers == null)
                 return null;

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using JsonApiSerializer.JsonApi;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,15 +14,6 @@ namespace Patreon.NET
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
 
-        [JsonProperty(PropertyName = "attributes")]
-        public BenefitAttributes Attributes { get; set; }
-
-        [JsonProperty(PropertyName = "relationships")]
-        public BenefitRelationships Relationships { get; set; }
-    }
-
-    public class BenefitAttributes
-    {
         [JsonProperty(PropertyName = "title")]
         public string Title { get; set; }
 
@@ -63,14 +55,11 @@ namespace Patreon.NET
 
         [JsonProperty(PropertyName = "tiers_count")]
         public int TiersCount { get; set; }
-    }
 
-    public class BenefitRelationships
-    {
         [JsonProperty(PropertyName = "campaign")]
-        public Campaign Campaign { get; set; }
+        public Relationship<Campaign> Campaign { get; set; }
 
         [JsonProperty(PropertyName = "tiers")]
-        public List<Tier> Tiers { get; set; }
+        public Relationship<List<Tier>> Tiers { get; set; }
     }
 }
