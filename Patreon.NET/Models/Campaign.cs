@@ -113,5 +113,8 @@ namespace Patreon.NET
 
         [JsonProperty(PropertyName = "tiers")]
         public List<Tier> Tiers { get; set; }
+
+        [JsonProperty(PropertyName = "benefits")]
+        public List<Benefit> Benefits { get; set; }
     }
 }
