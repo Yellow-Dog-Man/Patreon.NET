@@ -144,47 +144,6 @@ namespace Patreon.NET
             return embeddedType;
         }
 
-        static void GenerateFields(Type type, StringBuilder str)
-        {
-            str.Append("fields%5B");
-
-            var name = type.Name.Replace("Attributes", "");
-
-            for(int i = 0; i < name.Length; i++)
-            {
-                var ch = name[i];
-
-                if (char.IsUpper(ch) && i != 0)
-                    str.Append("_");
-
-                str.Append(char.ToLower(ch));
-            }
-
-            str.Append("%5D=");
-
-            GenerateFieldList(type, str);
-        }
-
-        static void GenerateFieldList(Type type, StringBuilder str)
-        {
-            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-            {
-                var attributes = property.GetCustomAttributes(typeof(JsonPropertyAttribute), true);
-
-                if (attributes == null || attributes.Length == 0)
-                    continue;             
-
-                foreach (var attribute in attributes)
-                {
-                    str.Append(((JsonPropertyAttribute)attribute).PropertyName);
-                    str.Append(",");
-                }
-            }
-
-            // remove the last comma
-            str.Length -= 1;
-        }
-
         public static string AppendQuery(string url, string query)
         {
             if (url.Contains("?"))
