@@ -28,6 +28,9 @@ namespace Patreon.NET
         [JsonProperty(PropertyName = "payment_status")]
         public string PaymentStatus { get; set; }
 
+        [JsonProperty(PropertyName = "pledge_payment_status")]
+        public string PledgePaymentStatus { get; set; }
+
         [JsonProperty(PropertyName = "tier_id")]
         public string TierId { get; set; }
 

@@ -21,7 +21,7 @@ await foreach (var member in patreon.GetCampaignMembers().ConfigureAwait(false))
         var tier = patreon.TryGetTierById(pledge.TierId);
 
         Console.WriteLine($"\tPledge: {pledge.Id}, {pledge.Date}, Amount: {pledge.AmountCents * 0.01:F2} {pledge.CurrencyCode}, " +
-            $"Payment Status: {pledge.PaymentStatus}\n" +
+            $"Payment Status: {pledge.PaymentStatus ?? pledge.PledgePaymentStatus}\n" +
             $"\t\tTier {tier.Title}, USD: {tier.AmountCents * 0.01:F2}, URL: {tier.URL}");
     }
 }
