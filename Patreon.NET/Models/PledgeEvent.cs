@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JsonApiSerializer.JsonApi;
 using Newtonsoft.Json;
 
 namespace Patreon.NET
@@ -32,5 +33,8 @@ namespace Patreon.NET
 
         [JsonProperty(PropertyName = "tier_title")]
         public string TierTitle { get; set; }
+
+        [JsonProperty(PropertyName = "tier")]
+        public Relationship<Tier> Tier { get; set; }
     }
 }
