@@ -38,13 +38,17 @@ namespace Patreon.NET
             httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
         }
 
-        static string GenerateFieldsAndIncludes(Type rootType, HashSet<Type> ignoreFields = null)
+        static string GenerateFieldsAndIncludes(Type rootType, HashSet<Type> ignoreFields = null, List<string> ignoreIncludes = null)
         {
             var str = new StringBuilder();
             var generatedTypes = new HashSet<Type>();
             var includes = new HashSet<string>();
 
-            GenerateFieldsAndIncludes(rootType, str, generatedTypes, includes, ignoreFields);
+            GenerateFieldsAndIncludes(rootType, str, generatedTypes, null, includes, ignoreFields);
+
+            if (ignoreIncludes != null)
+                foreach (var include in ignoreIncludes)
+                    includes.Remove(include);
 
             if (includes.Count > 0)
                 str.Append("&include=" + string.Join(",", includes));
@@ -52,7 +56,9 @@ namespace Patreon.NET
             return str.ToString();
         }
 
-        static void GenerateFieldsAndIncludes(Type rootType, StringBuilder str, HashSet<Type> generatedTypes, HashSet<string> includes,
+        static void GenerateFieldsAndIncludes(Type rootType, StringBuilder str, HashSet<Type> generatedTypes, 
+            string rootInclude,
+            HashSet<string> includes,
             HashSet<Type> ignoreFields)
         {
             if (!generatedTypes.Add(rootType))
@@ -64,14 +70,14 @@ namespace Patreon.NET
             {
                 str.Append("fields%5B");
 
-                var name = rootType.Name.Replace("Attributes", "");
+                var name = rootType.Name;
 
                 for (int i = 0; i < name.Length; i++)
                 {
                     var ch = name[i];
 
                     if (char.IsUpper(ch) && i != 0)
-                        str.Append("_");
+                        str.Append("-");
 
                     str.Append(char.ToLower(ch));
                 }
@@ -103,7 +109,7 @@ namespace Patreon.NET
                         continue;
 
                     // add it to the list of includes and handle generating fields afterwards
-                    if(includes.Add(fieldName))
+                    if(includes.Add(rootInclude + fieldName))
                         relationships.Add(property);
 
                     continue;
@@ -128,7 +134,12 @@ namespace Patreon.NET
                 if(ignoreFields == null || !ignoreFields.Contains(relationshipType))
                     str.Append("&");
 
-                GenerateFieldsAndIncludes(relationshipType, str, generatedTypes, includes, ignoreFields);
+                var nestedInclude = relationship.GetCustomAttribute<JsonPropertyAttribute>(true).PropertyName + ".";
+
+                if (rootInclude != null)
+                    nestedInclude = rootInclude + "." + nestedInclude;
+
+                GenerateFieldsAndIncludes(relationshipType, str, generatedTypes, nestedInclude, includes, ignoreFields);
             }
         }
 
@@ -176,6 +187,13 @@ namespace Patreon.NET
 #endif
                 }
             }
+            else
+            {
+#if DEBUG
+                var message = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                Console.WriteLine($"Response: {response.StatusCode} - {message}");
+#endif
+            }
 
             return null;
         }
@@ -211,7 +229,8 @@ namespace Patreon.NET
                 var url = next;
 
                 url = AppendQuery(url, GenerateFieldsAndIncludes(typeof(Member), 
-                    new HashSet<Type>() { typeof(PledgeEvent), typeof(Tier) }));
+                    new HashSet<Type>() { typeof(Tier) }
+                    ));
 
                 var document = await GET<DocumentRoot<Member[]>>(url).ConfigureAwait(false);
 
