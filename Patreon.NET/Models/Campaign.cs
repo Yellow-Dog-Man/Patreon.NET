@@ -17,7 +17,7 @@ namespace Patreon.NET
         public string Id { get; set; }
 
         [JsonProperty(PropertyName = "created_at")]
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         [JsonProperty(PropertyName = "creation_name")]
         public string CreationName { get; set; }
@@ -68,7 +68,7 @@ namespace Patreon.NET
         public string PledgeUrl { get; set; }
 
         [JsonProperty(PropertyName = "published_at")]
-        public DateTime PublishedAt { get; set; }
+        public DateTimeOffset PublishedAt { get; set; }
 
         [JsonProperty(PropertyName = "rss_artwork_url")]
         public string RSSArtworkURL { get; set; }

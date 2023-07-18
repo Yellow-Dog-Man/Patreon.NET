@@ -22,7 +22,7 @@ namespace Patreon.NET
         public bool? CanSeeNSFW { get; set; }
 
         [JsonProperty(PropertyName = "created")]
-        public DateTime Created { get; set; }
+        public DateTimeOffset Created { get; set; }
 
         [JsonProperty(PropertyName = "email")]
         public string Email { get; set; }

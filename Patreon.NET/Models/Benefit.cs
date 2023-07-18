@@ -30,7 +30,7 @@ namespace Patreon.NET
         public string BenefitType { get; set; }
 
         [JsonProperty(PropertyName = "created_at")]
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         [JsonProperty(PropertyName = "deliverables_due_today_count")]
         public int DeliverablesDueTodayCount { get; set; }
@@ -42,7 +42,7 @@ namespace Patreon.NET
         public int NotDeliveredDeliverablesCount { get; set; }
 
         [JsonProperty(PropertyName = "next_deliverable_due_date")]
-        public DateTime NextDeliverableDueDate { get; set; }
+        public DateTimeOffset NextDeliverableDueDate { get; set; }
 
         [JsonProperty(PropertyName = "is_deleted")]
         public bool IsDeleted { get; set; }

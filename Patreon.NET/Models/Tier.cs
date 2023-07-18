@@ -19,13 +19,13 @@ namespace Patreon.NET
         public int AmountCents { get; set; }
 
         [JsonProperty(PropertyName = "created_at")]
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         [JsonProperty(PropertyName = "description")]
         public string Description { get; set; }
 
         [JsonProperty(PropertyName = "edited_at")]
-        public DateTime EditedAt { get; set; }
+        public DateTimeOffset EditedAt { get; set; }
 
         [JsonProperty(PropertyName = "image_url")]
         public string ImageURL { get; set; }
@@ -40,7 +40,7 @@ namespace Patreon.NET
         public bool Published { get; set; }
 
         [JsonProperty(PropertyName = "published_at")]
-        public DateTime PublishedAt { get; set; }
+        public DateTimeOffset PublishedAt { get; set; }
 
         [JsonProperty(PropertyName = "remaining")]
         public int? Remaining { get; set; }
@@ -52,7 +52,7 @@ namespace Patreon.NET
         public string Title { get; set; }
 
         [JsonProperty(PropertyName = "unpublished_at")]
-        public DateTime? UnpublishedAt { get; set; }
+        public DateTimeOffset? UnpublishedAt { get; set; }
 
         [JsonProperty(PropertyName = "url")]
         public string URL { get; set; }

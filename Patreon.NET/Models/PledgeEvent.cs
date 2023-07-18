@@ -23,7 +23,7 @@ namespace Patreon.NET
         public string CurrencyCode { get; set; }
 
         [JsonProperty(PropertyName = "date")]
-        public DateTime Date { get; set; }
+        public DateTimeOffset Date { get; set; }
 
         [JsonProperty(PropertyName = "payment_status")]
         public string PaymentStatus { get; set; }
