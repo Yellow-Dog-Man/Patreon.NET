@@ -32,7 +32,7 @@ namespace Patreon.NET
         public bool IsFollower { get; set; }
 
         [JsonProperty(PropertyName = "last_charge_date")]
-        public DateTimeOffset LastChargeDate { get; set; }
+        public DateTimeOffset? LastChargeDate { get; set; }
 
         [JsonProperty(PropertyName = "last_charge_status")]
         public string LastChargeStatus { get; set; }
@@ -41,7 +41,7 @@ namespace Patreon.NET
         public int LifetimeSupportCents { get; set; }
 
         [JsonProperty(PropertyName = "next_charge_date")]
-        public DateTimeOffset NextChargeDate { get; set; }
+        public DateTimeOffset? NextChargeDate { get; set; }
 
         [JsonProperty(PropertyName = "note")]
         public string Note { get; set; }
@@ -50,10 +50,10 @@ namespace Patreon.NET
         public string PatreonStatus { get; set; }
 
         [JsonProperty(PropertyName = "pledge_cadence")]
-        public int PledgeCadence { get; set; }
+        public int? PledgeCadence { get; set; }
 
         [JsonProperty(PropertyName = "pledge_relationship_start")]
-        public DateTimeOffset PledgeRelationshipStart { get; set; }
+        public DateTimeOffset? PledgeRelationshipStart { get; set; }
 
         [JsonProperty(PropertyName = "will_pay_amount_cents")]
         public int WillPayAmountCents { get; set; }
