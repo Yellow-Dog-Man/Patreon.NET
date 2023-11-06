@@ -56,7 +56,7 @@ namespace Patreon.NET
             return str.ToString();
         }
 
-        static void GenerateFieldsAndIncludes(Type rootType, StringBuilder str, HashSet<Type> generatedTypes, 
+        static void GenerateFieldsAndIncludes(Type rootType, StringBuilder str, HashSet<Type> generatedTypes,
             string rootInclude,
             HashSet<string> includes,
             HashSet<Type> ignoreFields)
@@ -228,7 +228,7 @@ namespace Patreon.NET
             {
                 var url = next;
 
-                url = AppendQuery(url, GenerateFieldsAndIncludes(typeof(Member), 
+                url = AppendQuery(url, GenerateFieldsAndIncludes(typeof(Member),
                     new HashSet<Type>() { typeof(Tier) }
                     ));
 
