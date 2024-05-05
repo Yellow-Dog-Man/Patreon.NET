@@ -252,6 +252,9 @@ namespace Patreon.NET
             if (_tiers == null)
                 return null;
 
+            if (string.IsNullOrEmpty(id))
+                return null;
+
             if (_tiers.TryGetValue(id, out var tier))
                 return tier;
 
