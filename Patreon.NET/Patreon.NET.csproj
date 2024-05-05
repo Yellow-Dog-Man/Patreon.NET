@@ -1,5 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Company>Yellow Dog Man Studios</Company>
+    <Authors>Yellow Dog Man Studios</Authors>
+    <PackageId>YellowDogMan.Patreon.NET</PackageId>
+    <Description>.Simple library for interacting with Patreon's API</Description>
+    <Copyright>Copyright (c) Yellow Dog Man Studios s.r.o. 2023</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/Yellow-Dog-Man/Patreon.NET</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectURL>https://yellowdogman.com/</PackageProjectURL>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>patreon</PackageTags>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+  </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="Images\icon.png" Pack="true" PackagePath="\"/>
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
