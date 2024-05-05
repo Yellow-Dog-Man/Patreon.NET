@@ -7,7 +7,7 @@ await patreon.UpdateCampaignInfo().ConfigureAwait(false);
 
 await foreach (var member in patreon.GetCampaignMembers().ConfigureAwait(false))
 {
-    Console.WriteLine($"Member: {member.FullName} - {member.Email}");
+    Console.WriteLine($"Member: {member.FullName} - {member.Email} - {member.PledgeCadence}");
 
     foreach(var tier in member.CurrentlyEntitledTiers.Data)
     {
@@ -22,7 +22,7 @@ await foreach (var member in patreon.GetCampaignMembers().ConfigureAwait(false))
 
         Console.WriteLine($"\tPledge: {pledge.Id}, {pledge.Date}, Amount: {pledge.AmountCents * 0.01:F2} {pledge.CurrencyCode}, " +
             $"Payment Status: {pledge.PaymentStatus ?? pledge.PledgePaymentStatus}\n" +
-            $"\t\tTier {tier.Title}, USD: {tier.AmountCents * 0.01:F2}, URL: {tier.URL}");
+            $"\t\tTier {tier?.Title}, USD: {tier?.AmountCents * 0.01:F2}, URL: {tier?.URL}");
     }
 }
 
