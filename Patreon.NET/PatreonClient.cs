@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -15,6 +14,8 @@ namespace Patreon.NET
     {
         public const string SAFE_ROOT = "https://www.patreon.com/api/oauth2/v2/";
         public const string PUBLIC_ROOT = "https://www.patreon.com/api/";
+
+        private const string Authorization = nameof(Authorization);
 
         public static string CampaignURL(string campaignId) => SAFE_ROOT + $"campaigns/{campaignId}";
         public static string PledgesURL(string campaignId) => CampaignURL(campaignId) + "/pledges";
@@ -32,10 +33,24 @@ namespace Patreon.NET
 
         public PatreonClient(string campaignId, string accessToken)
         {
-            this.campaignId = campaignId;
-
             httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
+            UpdateSettings(campaignId, accessToken);
+        }
+
+        /// <summary>
+        /// Update this Client's access token and campaign id.
+        /// </summary>
+        /// <param name="accessToken">New access token to use</param>
+        /// <param name="campaignId">New campaignId to use. Optional</param>
+        public void UpdateSettings(string accessToken, string? campaignId = null)
+        {
+            if (!string.IsNullOrEmpty(campaignId))
+                this.campaignId = campaignId;
+
+            if (httpClient.DefaultRequestHeaders.Contains(Authorization))
+                httpClient.DefaultRequestHeaders.Remove(Authorization);
+
+            httpClient.DefaultRequestHeaders.Add(Authorization, "Bearer " + accessToken);
         }
 
         static string GenerateFieldsAndIncludes(Type rootType, HashSet<Type>? ignoreFields = null, List<string>? ignoreIncludes = null)
@@ -59,7 +74,7 @@ namespace Patreon.NET
         static void GenerateFieldsAndIncludes(Type rootType, StringBuilder str, HashSet<Type> generatedTypes,
             string? rootInclude,
             HashSet<string> includes,
-            HashSet<Type> ignoreFields)
+            HashSet<Type>? ignoreFields)
         {
             if (!generatedTypes.Add(rootType))
                 return;
