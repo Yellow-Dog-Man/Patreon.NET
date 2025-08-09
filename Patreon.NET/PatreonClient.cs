@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -16,6 +15,8 @@ namespace Patreon.NET
         public const string SAFE_ROOT = "https://www.patreon.com/api/oauth2/v2/";
         public const string PUBLIC_ROOT = "https://www.patreon.com/api/";
 
+        private const string Authorization = nameof(Authorization);
+
         public static string CampaignURL(string campaignId) => SAFE_ROOT + $"campaigns/{campaignId}";
         public static string PledgesURL(string campaignId) => CampaignURL(campaignId) + "/pledges";
         public static string MembersURL(string campaignId) => CampaignURL(campaignId) + "/members";
@@ -23,22 +24,36 @@ namespace Patreon.NET
         public static string UserURL(string userId) => PUBLIC_ROOT + $"user/{userId}";
 
         HttpClient httpClient;
-        string campaignId;
+        string campaignId = string.Empty;
 
-        public Campaign Campaign => _campaign;
+        public Campaign? Campaign => _campaign;
 
-        Campaign _campaign;
-        Dictionary<string, Tier> _tiers;
+        Campaign? _campaign = null;
+        Dictionary<string, Tier>? _tiers = null;
 
         public PatreonClient(string campaignId, string accessToken)
         {
-            this.campaignId = campaignId;
-
             httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
+            UpdateSettings(campaignId, accessToken);
         }
 
-        static string GenerateFieldsAndIncludes(Type rootType, HashSet<Type> ignoreFields = null, List<string> ignoreIncludes = null)
+        /// <summary>
+        /// Update this Client's access token and campaign id.
+        /// </summary>
+        /// <param name="accessToken">New access token to use</param>
+        /// <param name="campaignId">New campaignId to use. Optional</param>
+        public void UpdateSettings(string accessToken, string? campaignId = null)
+        {
+            if (!string.IsNullOrEmpty(campaignId))
+                this.campaignId = campaignId;
+
+            if (httpClient.DefaultRequestHeaders.Contains(Authorization))
+                httpClient.DefaultRequestHeaders.Remove(Authorization);
+
+            httpClient.DefaultRequestHeaders.Add(Authorization, "Bearer " + accessToken);
+        }
+
+        static string GenerateFieldsAndIncludes(Type rootType, HashSet<Type>? ignoreFields = null, List<string>? ignoreIncludes = null)
         {
             var str = new StringBuilder();
             var generatedTypes = new HashSet<Type>();
@@ -57,9 +72,9 @@ namespace Patreon.NET
         }
 
         static void GenerateFieldsAndIncludes(Type rootType, StringBuilder str, HashSet<Type> generatedTypes,
-            string rootInclude,
+            string? rootInclude,
             HashSet<string> includes,
-            HashSet<Type> ignoreFields)
+            HashSet<Type>? ignoreFields)
         {
             if (!generatedTypes.Add(rootType))
                 return;
@@ -167,7 +182,7 @@ namespace Patreon.NET
 
         public async Task<HttpResponseMessage> GET(string url) => await httpClient.GetAsync(url).ConfigureAwait(false);
 
-        public async Task<T> GET<T>(string url)
+        public async Task<T?> GET<T>(string url)
             where T : class
         {
             var response = await GET(url).ConfigureAwait(false);
@@ -222,7 +237,7 @@ namespace Patreon.NET
 
         public async IAsyncEnumerable<Member> GetCampaignMembers()
         {
-            string next = MembersURL(campaignId);
+            string? next = MembersURL(campaignId);
 
             do
             {
@@ -233,6 +248,10 @@ namespace Patreon.NET
                     ));
 
                 var document = await GET<DocumentRoot<Member[]>>(url).ConfigureAwait(false);
+                if (document == null)
+                {
+                    break;
+                }  
 
                 foreach (var d in document.Data)
                     yield return d;
@@ -245,9 +264,9 @@ namespace Patreon.NET
             } while (next != null);
         }
 
-        public async Task<User> GetUser(string id) => (await GET<UserData>(UserURL(id)).ConfigureAwait(false))?.User;
+        public async Task<User?> GetUser(string id) => (await GET<UserData>(UserURL(id)).ConfigureAwait(false))?.User;
 
-        public Tier TryGetTierById(string id)
+        public Tier? TryGetTierById(string id)
         {
             if (_tiers == null)
                 return null;
