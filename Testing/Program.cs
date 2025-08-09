@@ -12,6 +12,8 @@ await foreach (var member in patreon.GetCampaignMembers().ConfigureAwait(false))
     foreach(var tier in member.CurrentlyEntitledTiers.Data)
     {
         var tierData = patreon.TryGetTierById(tier.Id);
+        if (tierData == null)
+            continue;
 
         Console.WriteLine($"\tEntitled Tier: {tierData.Title} - {tierData.AmountCents} cents ({tierData.Description})");
     }
