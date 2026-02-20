@@ -23,8 +23,8 @@ namespace Patreon.NET
         public static string MemberURL(string memberId) => SAFE_ROOT + $"members/{memberId}";
         public static string UserURL(string userId) => PUBLIC_ROOT + $"user/{userId}";
 
-        HttpClient httpClient;
-        string campaignId = string.Empty;
+        internal HttpClient httpClient;
+        internal string campaignId = string.Empty;
 
         public Campaign? Campaign => _campaign;
 
@@ -34,7 +34,7 @@ namespace Patreon.NET
         public PatreonClient(string campaignId, string accessToken)
         {
             httpClient = new HttpClient();
-            UpdateSettings(campaignId, accessToken);
+            UpdateSettings(accessToken, campaignId);
         }
 
         /// <summary>
